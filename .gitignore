@@ -1,4 +1,3 @@
 .next/
 .firebase/
 node_modules/
-public/auth-service-worker.js
