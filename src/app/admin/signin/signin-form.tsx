@@ -18,9 +18,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useUserSession } from "@/hooks/useUserSession";
-import { type AppUser, signIn } from "@/lib/firebase/auth";
+import { onAuthStateChanged, signIn } from "@/lib/firebase/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -32,12 +32,8 @@ const SigninSchema = z.object({
 	password: z.string().min(1),
 });
 
-type Props = {
-	initialUser: AppUser | null;
-};
-
-export const SigninForm: React.FC<Props> = ({ initialUser }) => {
-	const user = useUserSession(initialUser);
+export const SigninForm: React.FC = () => {
+	const router = useRouter();
 
 	const form = useForm<SigninSchema>({
 		resolver: zodResolver(SigninSchema),
@@ -47,13 +43,24 @@ export const SigninForm: React.FC<Props> = ({ initialUser }) => {
 		},
 	});
 
-	const onSubmit = (values: SigninSchema) => {
-		signIn(values.email, values.password);
-	};
-
 	useEffect(() => {
-		console.log({ user });
-	}, [user]);
+		const unsubscribe = onAuthStateChanged((authUser) => {
+			console.log({
+				authUser,
+			});
+			if (authUser) router.push("./sermons");
+		});
+		return () => unsubscribe();
+	}, []);
+
+	const onSubmit = async (values: SigninSchema) => {
+		try {
+			await signIn(values.email, values.password);
+			// router.push("./sermons");
+		} catch (error) {
+			console.error("Error signing in", error);
+		}
+	};
 
 	return (
 		<Form {...form}>
