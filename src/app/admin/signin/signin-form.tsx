@@ -18,11 +18,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { onAuthStateChanged, signIn } from "@/lib/firebase/auth";
+import { auth } from "@/lib/firebase";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -43,20 +43,26 @@ export const SigninForm: React.FC = () => {
 		},
 	});
 
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged((authUser) => {
-			console.log({
-				authUser,
-			});
-			if (authUser) router.push("./sermons");
-		});
-		return () => unsubscribe();
-	}, []);
-
 	const onSubmit = async (values: SigninSchema) => {
 		try {
-			await signIn(values.email, values.password);
-			// router.push("./sermons");
+			console.log("firebase: signing in");
+			const credential = await signInWithEmailAndPassword(
+				auth,
+				values.email,
+				values.password,
+			);
+
+			console.log("firebase: fetching id tokens");
+			const idToken = await credential.user.getIdToken();
+
+			console.log("local: signing in");
+			await fetch("/api/signin", {
+				headers: {
+					Authorization: `Bearer ${idToken}`,
+				},
+			});
+
+			router.push("./sermons");
 		} catch (error) {
 			console.error("Error signing in", error);
 		}

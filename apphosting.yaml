@@ -1,5 +1,4 @@
 env:
-  # Get these values from the Firebase console
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
     value: AIzaSyASXqFaP9SOQ7C_tqSonybSHsL9WFH2nCw
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN

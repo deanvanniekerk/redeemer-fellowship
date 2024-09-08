@@ -1,10 +1,16 @@
 "use client";
 
 import { Spinner } from "@/components/ui/spinner";
-import { useUserSession } from "@/hooks/use-user-session";
-import type { AppUser } from "@/lib/firebase/auth.js";
+import { auth } from "@/lib/firebase";
+import type { AppUser } from "@/lib/types";
+import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { type PropsWithChildren, createContext, useEffect } from "react";
+import {
+	type PropsWithChildren,
+	createContext,
+	useEffect,
+	useState,
+} from "react";
 import type React from "react";
 
 export type UserState = {
@@ -28,10 +34,33 @@ export const UserProvider: React.FC<
 	}>
 > = ({ children, initialUser }) => {
 	const router = useRouter();
-	const user = useUserSession(initialUser);
+
+	// The initialUser comes from the server via a server component
+	const [user, setUser] = useState<AppUser | null>(initialUser);
 
 	useEffect(() => {
-		if (!user) router.push("./signin");
+		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+			setUser(
+				authUser
+					? {
+							uid: authUser?.uid,
+						}
+					: null,
+			);
+		});
+		return () => unsubscribe();
+	}, []);
+
+	useEffect(() => {
+		const handleSignedOut = async () => {
+			console.log("firebase: signing out");
+			await fetch("/api/signout");
+			router.push("./signin");
+		};
+
+		if (!user) {
+			handleSignedOut();
+		}
 	}, [user]);
 
 	if (!user) return <Spinner />;

@@ -1,3 +1,4 @@
 .next/
 .firebase/
 node_modules/
+.env.local

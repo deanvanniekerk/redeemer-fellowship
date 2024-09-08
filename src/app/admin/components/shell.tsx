@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { type AppUser, signOut } from "@/lib/firebase/auth";
+import { auth } from "@/lib/firebase";
+import type { AppUser } from "@/lib/types";
+import { signOut } from "firebase/auth";
 import {
 	Bell,
 	CircleUser,
@@ -29,6 +31,10 @@ type Props = PropsWithChildren<{
 }>;
 
 export const Shell: React.FC<Props> = ({ initialUser, children }) => {
+	async function handleSignout() {
+		await signOut(auth);
+	}
+
 	return (
 		<UserProvider initialUser={initialUser}>
 			<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -127,7 +133,7 @@ export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => signOut()}>
+								<DropdownMenuItem onClick={() => handleSignout()}>
 									Logout
 								</DropdownMenuItem>
 							</DropdownMenuContent>
