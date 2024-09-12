@@ -1,4 +1,9 @@
+import { clientConfig, serverConfig } from "@/lib/config";
 import type { Metadata } from "next";
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Shell } from "../components/shell";
 
 export const metadata: Metadata = {
 	title: "RF Admin",
@@ -10,11 +15,20 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	// const { currentUser } = await getAuthenticatedAppForUser();
+	const tokens = await getTokens(cookies(), {
+		apiKey: clientConfig.apiKey,
+		cookieName: serverConfig.cookieName,
+		cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+		serviceAccount: serverConfig.serviceAccount,
+	});
 
-	// console.log("(app) layout", { currentUser });
+	if (!tokens) {
+		redirect("./signin");
+	}
 
-	// if (!currentUser) redirect("./signin");
+	const user = {
+		uid: tokens.decodedToken.uid,
+	};
 
-	return <>{children}</>;
+	return <Shell initialUser={user}>{children}</Shell>;
 }

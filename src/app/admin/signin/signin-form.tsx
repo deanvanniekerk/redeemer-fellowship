@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -35,6 +36,8 @@ const SigninSchema = z.object({
 export const SigninForm: React.FC = () => {
 	const router = useRouter();
 
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+
 	const form = useForm<SigninSchema>({
 		resolver: zodResolver(SigninSchema),
 		defaultValues: {
@@ -45,6 +48,7 @@ export const SigninForm: React.FC = () => {
 
 	const onSubmit = async (values: SigninSchema) => {
 		try {
+			setIsLoading(true);
 			console.log("firebase: signing in");
 			const credential = await signInWithEmailAndPassword(
 				auth,
@@ -65,6 +69,8 @@ export const SigninForm: React.FC = () => {
 			router.push("./sermons");
 		} catch (error) {
 			console.error("Error signing in", error);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -109,7 +115,7 @@ export const SigninForm: React.FC = () => {
 						/>
 					</CardContent>
 					<CardFooter>
-						<Button className="w-full" type="submit">
+						<Button className="w-full" type="submit" isLoading={isLoading}>
 							Sign in
 						</Button>
 					</CardFooter>

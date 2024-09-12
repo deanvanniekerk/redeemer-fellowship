@@ -8,21 +8,20 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { auth } from "@/lib/firebase";
 import type { AppUser } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
 import {
-	Bell,
 	CircleUser,
-	Home,
+	type LucideIcon,
 	Menu,
-	Package2,
-	Search,
-	ShoppingCart,
+	NotebookPen,
+	Podcast,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { UserProvider } from "../providers/user-provider";
 
@@ -31,6 +30,10 @@ type Props = PropsWithChildren<{
 }>;
 
 export const Shell: React.FC<Props> = ({ initialUser, children }) => {
+	const path = usePathname();
+
+	const s = 30_000;
+
 	async function handleSignout() {
 		await signOut(auth);
 	}
@@ -42,30 +45,26 @@ export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 					<div className="flex h-full max-h-screen flex-col gap-2">
 						<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
 							<Link href="/" className="flex items-center gap-2 font-semibold">
-								<Package2 className="h-6 w-6" />
 								<span className="">RF Admin</span>
 							</Link>
-							<Button variant="outline" size="icon" className="ml-auto h-8 w-8">
-								<Bell className="h-4 w-4" />
-								<span className="sr-only">Toggle notifications</span>
-							</Button>
 						</div>
 						<div className="flex-1">
 							<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-								<Link
-									href="#"
-									className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-								>
-									<Home className="h-4 w-4" />
-									Sermons
-								</Link>
-								<Link
-									href="#"
-									className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-								>
-									<ShoppingCart className="h-4 w-4" />
-									Bible Studies
-								</Link>
+								<NavLink
+									href="./sermons"
+									icon={Podcast}
+									title="Sermons"
+									isSelected={
+										path === "/admin/sermons" ||
+										path === "/admin/sermons/create"
+									}
+								/>
+								<NavLink
+									href="./bible-studies"
+									icon={NotebookPen}
+									title="Bible Studies"
+									isSelected={path === "/admin/bible-studies"}
+								/>
 							</nav>
 						</div>
 					</div>
@@ -80,47 +79,35 @@ export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 									className="shrink-0 md:hidden"
 								>
 									<Menu className="h-5 w-5" />
-									<span className="sr-only">Toggle navigation menu</span>
 								</Button>
 							</SheetTrigger>
 							<SheetContent side="left" className="flex flex-col">
 								<nav className="grid gap-2 text-lg font-medium">
 									<Link
-										href="#"
+										href="./sermons"
 										className="flex items-center gap-2 text-lg font-semibold"
 									>
-										<Package2 className="h-6 w-6" />
-										<span className="sr-only">RF Admin</span>
+										<span>RF Admin</span>
 									</Link>
-									<Link
-										href="#"
-										className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-									>
-										<Home className="h-5 w-5" />
-										Sermons
-									</Link>
-									<Link
-										href="#"
-										className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-									>
-										<ShoppingCart className="h-5 w-5" />
-										Bible Studies
-									</Link>
+									<MobileNavLink
+										href="./sermons"
+										icon={Podcast}
+										title="Sermons"
+										selected={
+											path === "/admin/sermons" ||
+											path === "/admin/sermons/create"
+										}
+									/>
+									<MobileNavLink
+										href="./bible-studies"
+										icon={NotebookPen}
+										title="Bible Studies"
+										selected={path === "/admin/bible-studies"}
+									/>
 								</nav>
 							</SheetContent>
 						</Sheet>
-						<div className="w-full flex-1">
-							<form>
-								<div className="relative">
-									<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-									<Input
-										type="search"
-										placeholder="Search products..."
-										className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-									/>
-								</div>
-							</form>
-						</div>
+						<div className="w-full flex-1" />
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
@@ -129,7 +116,6 @@ export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 									className="rounded-full"
 								>
 									<CircleUser className="h-5 w-5" />
-									<span className="sr-only">Toggle user menu</span>
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
@@ -147,3 +133,39 @@ export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 		</UserProvider>
 	);
 };
+
+const NavLink: React.FC<{
+	href: string;
+	icon: LucideIcon;
+	title: string;
+	isSelected: boolean;
+}> = ({ href, icon: Icon, title, isSelected }) => (
+	<Link
+		href={href}
+		className={cn(
+			"flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+			isSelected ? "bg-muted text-primary" : "text-muted-foreground",
+		)}
+	>
+		<Icon className="h-4 w-4" />
+		{title}
+	</Link>
+);
+
+const MobileNavLink: React.FC<{
+	href: string;
+	icon: LucideIcon;
+	title: string;
+	selected: boolean;
+}> = ({ href, icon: Icon, title, selected }) => (
+	<Link
+		href={href}
+		className={cn(
+			"mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground",
+			selected ? "bg-muted text-foreground" : "text-muted-foreground",
+		)}
+	>
+		<Icon className="h-5 w-5" />
+		{title}
+	</Link>
+);
