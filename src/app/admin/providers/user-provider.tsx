@@ -1,7 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/ui/spinner";
-import { auth } from "@/lib/firebase";
+import { authClient } from "@/lib/firebase-client";
 import type { AppUser } from "@/lib/types";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -39,7 +39,7 @@ export const UserProvider: React.FC<
 	const [user, setUser] = useState<AppUser | null>(initialUser);
 
 	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+		const unsubscribe = onAuthStateChanged(authClient, (authUser) => {
 			setUser(
 				authUser
 					? {

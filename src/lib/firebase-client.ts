@@ -5,7 +5,7 @@ import { getStorage } from "firebase/storage";
 import { clientConfig } from "./config";
 
 // client app
-export const firebaseApp = initializeApp(clientConfig);
-export const auth = getAuth(firebaseApp);
-export const db = getFirestore(firebaseApp);
-export const storage = getStorage(firebaseApp);
+export const firebaseAppClient = initializeApp(clientConfig);
+export const authClient = getAuth(firebaseAppClient);
+export const dbClient = getFirestore(firebaseAppClient);
+export const storageClient = getStorage(firebaseAppClient);

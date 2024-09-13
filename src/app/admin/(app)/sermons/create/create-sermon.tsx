@@ -11,6 +11,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { insertSermon } from "@/lib/firestore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -40,7 +41,11 @@ export const CreateSermon: React.FC = () => {
 		try {
 			setIsLoading(true);
 
-			router.push("./sermons");
+			console.log({ values });
+
+			await insertSermon(values);
+
+			router.push("/admin/sermons");
 		} catch (error) {
 			console.error("Error signing in", error);
 		} finally {
@@ -59,9 +64,9 @@ export const CreateSermon: React.FC = () => {
 							name="title"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email</FormLabel>
+									<FormLabel>Title</FormLabel>
 									<FormControl>
-										<Input placeholder="m@example.com" {...field} />
+										<Input {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -72,16 +77,42 @@ export const CreateSermon: React.FC = () => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Password</FormLabel>
+									<FormLabel>Description</FormLabel>
 									<FormControl>
-										<Input type="password" {...field} />
+										<Input {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="speaker"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Speaker</FormLabel>
+									<FormControl>
+										<Input {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="audioUrl"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Audio URL</FormLabel>
+									<FormControl>
+										<Input {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 						<Button className="w-full" type="submit" isLoading={isLoading}>
-							Sign in
+							Create
 						</Button>
 					</form>
 				</Form>

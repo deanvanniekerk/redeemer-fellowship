@@ -9,7 +9,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { auth } from "@/lib/firebase";
+import { authClient } from "@/lib/firebase-client";
 import type { AppUser } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
@@ -32,10 +32,8 @@ type Props = PropsWithChildren<{
 export const Shell: React.FC<Props> = ({ initialUser, children }) => {
 	const path = usePathname();
 
-	const s = 30_000;
-
 	async function handleSignout() {
-		await signOut(auth);
+		await signOut(authClient);
 	}
 
 	return (

@@ -1,12 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PageTitle } from "../../components/page-title";
+import { getSermonQueryOptions } from "./query";
 
 export const Sermons: React.FC = () => {
 	const router = useRouter();
+
+	const { data } = useSuspenseQuery(getSermonQueryOptions());
+
+	console.log({ sermons: data });
+
 	return (
 		<>
 			<PageTitle
