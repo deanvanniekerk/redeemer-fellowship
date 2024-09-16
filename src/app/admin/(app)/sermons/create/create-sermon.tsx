@@ -2,6 +2,7 @@
 
 import { PageTitle } from "@/app/admin/components/page-title";
 import { Button } from "@/components/ui/button";
+import {} from "@/components/ui/card";
 import {
 	Form,
 	FormControl,
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { insertSermon } from "@/lib/firestore";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,10 +57,26 @@ export const CreateSermon: React.FC = () => {
 
 	return (
 		<>
-			<PageTitle>New Sermon</PageTitle>
-			<div className="rounded-lg border border-solid shadow-sm">
+			<div className="w-full max-w-md mx-auto">
+				<PageTitle>New Sermon</PageTitle>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className="mt-8 space-y-4"
+					>
+						<FormField
+							control={form.control}
+							name="series"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Series</FormLabel>
+									<FormControl>
+										<Input {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 						<FormField
 							control={form.control}
 							name="title"
@@ -111,9 +129,19 @@ export const CreateSermon: React.FC = () => {
 								</FormItem>
 							)}
 						/>
-						<Button className="w-full" type="submit" isLoading={isLoading}>
-							Create
-						</Button>
+						<div className="flex justify-end space-x-4 pt-8">
+							<Button
+								variant="outline"
+								isLoading={isLoading}
+								onClick={() => router.push("/admin/sermons")}
+								icon={<ChevronLeft className="w-4 h-4" />}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" isLoading={isLoading}>
+								Create
+							</Button>
+						</div>
 					</form>
 				</Form>
 			</div>

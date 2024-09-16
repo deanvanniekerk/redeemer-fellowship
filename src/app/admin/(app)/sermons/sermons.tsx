@@ -1,18 +1,58 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { formatDate } from "@/lib/date";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { PageTitle } from "../../components/page-title";
+import type { Sermon } from "../schema";
 import { getSermonQueryOptions } from "./query";
 
 export const Sermons: React.FC = () => {
 	const router = useRouter();
 
-	const { data } = useSuspenseQuery(getSermonQueryOptions());
+	const { data: sermons } = useSuspenseQuery(getSermonQueryOptions());
 
-	console.log({ sermons: data });
+	const columns: ColumnDef<Sermon>[] = useMemo(
+		() => [
+			{
+				header: "Title",
+				accessorKey: "title",
+			},
+			{
+				header: "Speaker",
+				accessorKey: "speaker",
+			},
+			{
+				header: "Date",
+				accessorKey: "date",
+				cell: ({ row }) => formatDate(row.original.date, "short"),
+			},
+		],
+		[],
+	);
+
+	const table = useReactTable({
+		data: sermons,
+		columns: columns,
+		getCoreRowModel: getCoreRowModel(),
+	});
 
 	return (
 		<>
@@ -28,17 +68,53 @@ export const Sermons: React.FC = () => {
 			>
 				Sermons
 			</PageTitle>
-			<div
-				className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-				x-chunk="dashboard-02-chunk-1"
-			>
-				<div className="flex flex-col items-center gap-1 text-center">
-					<h3 className="text-2xl font-bold tracking-tight">
-						You have no sermons
-					</h3>
-
-					<Button className="mt-4">Add Sermon</Button>
-				</div>
+			<div className="rounded-md border">
+				<Table>
+					<TableHeader>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</TableHead>
+								))}
+							</TableRow>
+						))}
+					</TableHeader>
+					<TableBody>
+						{table.getRowModel().rows?.length ? (
+							table.getRowModel().rows.map((row) => (
+								<TableRow
+									key={row.id}
+									data-state={row.getIsSelected() && "selected"}
+								>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 text-center"
+								>
+									No results.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
 			</div>
 		</>
 	);
